@@ -1,0 +1,490 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gezz - Payment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(rgba(13, 25, 42, 0.85), rgba(13, 25, 42, 0.95)), url('https://files.catbox.moe/ieecmc.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+        }
+        
+        .container {
+            background: rgba(13, 25, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(135, 150, 255, 0.1) 0%, transparent 70%);
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+        
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            max-width: 180px;
+            height: auto;
+            border-radius: 50%;
+            box-shadow: 0 0 25px rgba(135, 150, 255, 0.5);
+            margin-bottom: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 700;
+            color: #e0e0ff;
+            text-shadow: 0 0 15px rgba(135, 150, 255, 0.7);
+            font-size: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h2 {
+            text-align: center;
+            margin: 25px 0 20px;
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #a0a0ff;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 30px 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .payment-btn {
+            display: flex;
+            align-items: center;
+            padding: 18px 25px;
+            border-radius: 15px;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .payment-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .payment-btn:hover::before {
+            left: 100%;
+        }
+        
+        .payment-btn i {
+            margin-right: 15px;
+            font-size: 1.8rem;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .payment-btn span {
+            flex-grow: 1;
+            text-align: left;
+        }
+        
+        .payment-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .payment-btn:active {
+            transform: translateY(2px);
+        }
+        
+        /* Tema Nebula untuk QRIS */
+        .qris-btn {
+            background: linear-gradient(135deg, #4776E6, #8E54E9);
+            color: white;
+            box-shadow: 0 5px 20px rgba(126, 87, 234, 0.4);
+        }
+        
+        .qris-btn:hover {
+            background: linear-gradient(135deg, #3b63c9, #7a46c7);
+            box-shadow: 0 0 25px rgba(126, 87, 234, 0.6);
+        }
+        
+        /* Tema Nebula untuk DANA */
+        .dana-btn {
+            background: linear-gradient(135deg, #0eb1fe, #0e62fe);
+            color: white;
+            box-shadow: 0 5px 20px rgba(14, 152, 254, 0.4);
+        }
+        
+        .dana-btn:hover {
+            background: linear-gradient(135deg, #0d9de5, #0d57e5);
+            box-shadow: 0 0 25px rgba(14, 152, 254, 0.6);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a2b3c, #2c3e50);
+            padding: 25px;
+            border-radius: 20px;
+            max-width: 90%;
+            max-height: 90%;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 50px rgba(135, 150, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 30px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            transition: 0.3s;
+        }
+        
+        .close-btn:hover {
+            color: #ff3366;
+            transform: scale(1.1);
+        }
+        
+        .dana-info {
+            display: none;
+            background: rgba(14, 152, 254, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid rgba(14, 152, 254, 0.3);
+            box-shadow: 0 0 15px rgba(14, 152, 254, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .dana-info h3 {
+            color: #0eb1fe;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .dana-info p {
+            font-size: 1.3rem;
+            margin: 10px 0;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(135deg, #0eb1fe, #0e62fe);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(14, 152, 254, 0.3);
+        }
+        
+        .copy-btn:hover {
+            background: linear-gradient(135deg, #0d9de5, #0d57e5);
+            box-shadow: 0 0 15px rgba(14, 152, 254, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 25px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .instructions p {
+            margin-bottom: 10px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #a0a0ff;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(14, 152, 254, 0.9);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .logo {
+                max-width: 150px;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .payment-btn {
+                padding: 15px 20px;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="stars" id="stars"></div>
+        
+        <div class="logo-container">
+            <img src="https://files.catbox.moe/lj3kf9.jpg" alt="Gezz Logo" class="logo">
+        </div>
+        
+        <h1>Giszz Payment</h1>
+        
+        <h2>Silahkan Pilih Metode Pembayaran</h2>
+        
+        <div class="payment-options">
+            <button class="payment-btn qris-btn" onclick="showQRCode()">
+                <i class="fas fa-qrcode"></i>
+                <span>QRIS</span>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <button class="payment-btn dana-btn" onclick="showDanaInfo()">
+                <i class="fas fa-wallet"></i>
+                <span>DANA</span>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <div id="danaInfo" class="dana-info">
+            <h3>Informasi Pembayaran DANA</h3>
+            <p id="danaNumber">083857739097</p>
+            <p>Atas Nama Munxxx</p>
+            <button class="copy-btn" onclick="copyDanaNumber()">
+                <i class="fas fa-copy"></i> Salin Nomor
+            </button>
+        </div>
+        
+        <div class="instructions">
+            <p><strong>Instruksi Pembayaran:</strong></p>
+            <p>1. Pilih metode pembayaran (QRIS atau DANA)</p>
+            <p>2. Untuk QRIS, scan kode QR yang muncul</p>
+            <p>3. Untuk DANA, gunakan nomor yang tertera atau salin nomor</p>
+            <p>4. Ikuti instruksi pada aplikasi pembayaran Anda</p>
+        </div>
+        
+        <div class="footer">
+            <p>Pastikan Anda telah menyelesaikan pembayaran sebelum meninggalkan halaman ini</p>
+        </div>
+    </div>
+    
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeQRCode()">&times;</span>
+            <h3 style="color: #fff; margin-bottom: 20px; text-shadow: 0 0 10px rgba(135, 150, 255, 0.5);">Scan QR Code Untuk Pembayaran</h3>
+            <img src="https://files.catbox.moe/qkghhy.jpg" alt="QR Code Pembayaran">
+            <p style="color: #a0a0ff; margin-top: 20px; font-size: 1.1rem;">Gunakan aplikasi pembayaran Anda untuk scan QR code ini</p>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast">Nomor DANA berhasil disalin!</div>
+
+    <script>
+        function showQRCode() {
+            document.getElementById('qrModal').style.display = 'flex';
+        }
+        
+        function closeQRCode() {
+            document.getElementById('qrModal').style.display = 'none';
+        }
+        
+        function showDanaInfo() {
+            const danaInfo = document.getElementById('danaInfo');
+            danaInfo.style.display = danaInfo.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        function copyDanaNumber() {
+            const danaNumber = document.getElementById('danaNumber').textContent;
+            navigator.clipboard.writeText(danaNumber).then(() => {
+                showToast('Nomor DANA berhasil disalin!');
+            }).catch(err => {
+                showToast('Gagal menyalin nomor');
+                console.error('Error copying text: ', err);
+            });
+        }
+        
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Tutup modal jika diklik di luar area konten
+        window.onclick = function(event) {
+            const modal = document.getElementById('qrModal');
+            if (event.target == modal) {
+                closeQRCode();
+            }
+        }
+        
+        // Membuat efek bintang
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starsCount = 100;
+            
+            for (let i = 0; i < starsCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                const size = Math.random() * 3;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                star.style.animationDelay = `${Math.random() * 2}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        window.onload = function() {
+            createStars();
+        };
+    </script>
+</body>
+</html>
